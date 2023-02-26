@@ -51,7 +51,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>imagebrake.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>F9ED4D9FC3B0DD249B2DADB024DC6D81ABE3A235</ManifestCertificateThumbprint>
@@ -142,9 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icon1.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Afterglow-Forum-Faces-2-Windows-Zealot.128.png" />
+    <Resource Include="imagebrake.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icon2.ico" />
@@ -162,13 +161,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="imagebrake.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Icon3.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="imagebrake.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

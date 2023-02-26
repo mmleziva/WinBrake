@@ -64,16 +64,10 @@ namespace MB
                 Initim();
                 B.Initbuf();
                 serial = new SerialPort();
-                ports = SerialPort.GetPortNames();
                 portsList = new List<string>();
-                foreach (string s in ports)
-                {
-                    portsList.Add(s);
-                }
-                n = portsList.Count - 1;
-                serial.PortName = portsList[n];
+              //  tryport();
                 OpenCOM();
-                //      portsList.Add("NONE");
+
             }
             catch (Exception e)
             {
@@ -84,7 +78,41 @@ namespace MB
 
         }
 
+        //opening COM port
+        public static void OpenCOM()
+        {
+            ports = SerialPort.GetPortNames();
+            portsList.Clear();
+            foreach (string s in ports)
+            {
+                portsList.Add(s);
+            }
+            n = portsList.Count - 1;
+            if (!serial.IsOpen)
+            {
 
+                if (n >= 0)
+                {
+                    serial.PortName = portsList[n];
+                    serial.BaudRate = 115200;
+                    serial.Open();
+                    serial.DataReceived += Read;
+                    BOPEN = true;
+                }
+            }
+        }
+        public static void tryport()
+        {
+            ports = SerialPort.GetPortNames();
+            foreach (string s in ports)
+            {
+                portsList.Add(s);
+            }
+            n = portsList.Count - 1;
+            if (n > 0)
+                serial.PortName = portsList[n];
+            serial.BaudRate = 115200;
+        }
         //configure timer
         public  void Initim()
         {
@@ -232,17 +260,6 @@ namespace MB
                     CRC.H = uchCRCHi;
                     return CRC;        
                 }
-        //opening COM port
-        public void OpenCOM()
-        {
-            if (!serial.IsOpen)
-            {
-                serial.BaudRate =  115200;
-                serial.Open();
-                serial.DataReceived += Read;
-                BOPEN = true;
-            }
-        }
 
     }
 }

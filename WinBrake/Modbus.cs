@@ -30,9 +30,9 @@ namespace MB
     public class Modbus
     {
         static int i;
-        const int LH = 64;
-        const int LI = 64;
-        const int LM = 64;
+        const int LH = 128;
+        const int LI = 128;
+        const int LM = 128;
         public static WORD[] HOLDREGS = new WORD[LH];
         public static WORD[] INPREGS = new WORD[LI];
         public static ushort HOLDADR0 = 40000;
