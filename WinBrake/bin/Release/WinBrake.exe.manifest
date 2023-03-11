@@ -78,14 +78,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="WinBrake.exe" size="305120">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="WinBrake.exe" size="306144">
       <assemblyIdentity name="WinBrake" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>OUkZYRSo+sX2axeIjElqsQE26PF5N/gJlR6nrjmLUAM=</dsig:DigestValue>
+        <dsig:DigestValue>p+ErLduWG76aLGIPQKAvWmWQm17/662cJzLpFo8q0oM=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

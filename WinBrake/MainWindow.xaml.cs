@@ -20,6 +20,8 @@ using OxyPlot.Series;
 using OxyPlot.Axes;
 using OxyPlot.Wpf;
 using MB;
+using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace WinBrake
 {
@@ -100,6 +102,59 @@ namespace WinBrake
             Modbus.MBrec += new Modbus.rec(RewP);
             Modbus.INPREGS[0].w = 0x22;//t
             StarTime = DateTime.Now;
+        }
+
+        private void Save_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                // Configure save file dialog box
+                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+                dlg.FileName = "Shot"; // Default file name
+                dlg.Filter = " documents(png)|*.png|documents(pdf)|*.pdf|svg documents(svg)| *.svg "; // Filter files by extension
+
+                // Show save file dialog box
+                Nullable<bool> result = dlg.ShowDialog();
+
+                // Process save file dialog box results
+                if (result == true)
+                {
+                    if (dlg.FilterIndex == 2)
+                    {
+                        using (var fs = File.Create(dlg.FileName + dlg.DefaultExt))
+                        {
+                            var pdfExporter = new OxyPlot.PdfExporter { Width = 600, Height = 400 };
+                            pdfExporter.Export(MyModel, fs);
+                        }
+
+                    }
+                    else
+                        // Save document               
+                        using (var fs = new System.IO.FileStream(dlg.FileName + dlg.DefaultExt, FileMode.OpenOrCreate))
+                        {
+                            switch (dlg.FilterIndex)
+                            {
+                                case 1:
+                                    var pngexp = new PngExporter();
+                                    
+                                    pngexp.Export(MyModel, fs);
+                                    break;
+                                case 3:
+                                    var svgexp = new OxyPlot.SvgExporter();
+                                    svgexp.Export(MyModel, fs);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Save file except:\n" + ex.ToString());
+            }
+
         }
 
         private void SetPar_MouseDoubleClick(object sender, MouseButtonEventArgs e)
