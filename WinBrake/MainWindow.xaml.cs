@@ -43,10 +43,11 @@ namespace WinBrake
         public static int n, dtn,SAMPLETIME=50,SAMPLESREAD=5,WORDSREAD=6;
         public static string[] ports;
         public static List<string> portsList;
-        public static UInt16 ForcePar, CyclePar,NoforcePar;
+        public static UInt16 ForcePar, CyclesBGreasePar,NoforcePar;
+        public static Int16 CyclesPar,CycAx,CycAxold;
         Modbus mbus;
         public DateTime StarTime;
-        public static bool COMMAND;
+        public static bool COMMAND,STARTGET;
         public static TimeSpan time;
         public MainWindow()
         {
@@ -102,6 +103,7 @@ namespace WinBrake
             Modbus.MBrec += new Modbus.rec(RewP);
             Modbus.INPREGS[0].w = 0x22;//t
             StarTime = DateTime.Now;
+            
         }
 
         private void Save_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -167,20 +169,24 @@ namespace WinBrake
                  Modbus.HOLDREGS[2].w |= 1;
             else
                  Modbus.HOLDREGS[2].w &= 0xfffe;
-            if(UInt16.TryParse(Force.Text, out ForcePar))
+            if (Test.IsChecked == true)
+                Modbus.HOLDREGS[2].w |= 2;
+            else
+                Modbus.HOLDREGS[2].w &= 0xfffd;
+            if (UInt16.TryParse(Force.Text, out ForcePar))
                  Modbus.HOLDREGS[3].w =ForcePar;
             if(UInt16.TryParse(Noforce.Text, out NoforcePar))
                  Modbus.HOLDREGS[4].w = NoforcePar;
             if(float.TryParse(Closemm.Text, out ClosingPar))
                  Modbus.HOLDREGS[5].w = (UInt16)(ClosingPar*KD);
-            if (UInt16.TryParse(Cycles.Text, out CyclePar))
-                Modbus.HOLDREGS[6].w = CyclePar;
-            if (UInt16.TryParse(Gredist.Text, out CyclePar))
-                Modbus.HOLDREGS[6].w = CyclePar;
+            if (UInt16.TryParse(CyclesBGrease.Text, out CyclesBGreasePar))
+                Modbus.HOLDREGS[6].w = CyclesBGreasePar;
             if (float.TryParse(Gredist.Text, out GredisPar))
                 Modbus.HOLDREGS[7].w = (UInt16)(GredisPar * KD);
             if (float.TryParse(Curt.Text, out CurtPar))
                 Modbus.HOLDREGS[8].w = (UInt16)(CurtPar *20 );
+            if (Int16.TryParse(Cycles.Text, out CyclesPar))
+                Modbus.HOLDREGS[9].w = (UInt16)CyclesPar;
 
             Modbus.ReqStruc.unitId = 0x1;
             Modbus.ReqStruc.funCode = 0x10;
@@ -221,7 +227,19 @@ namespace WinBrake
                 }
                 else if (COMMAND)
                 {
-                  //  Space.Background = Brushes.LightPink;
+                    //  Space.Background = Brushes.LightPink;
+                    Modbus.Require(Modbus.ReqStruc);//t
+                }
+                else if(!STARTGET)
+                {
+                    STARTGET = true;
+                    Modbus.ReqStruc.unitId = 0x1;
+                    Modbus.ReqStruc.funCode = 0x3;
+                    Modbus.ReqStruc.startAdr.w = Modbus.HOLDADR0;
+                    Modbus.ReqStruc.quantity.w = 12;
+                    GetPar.Background = Brushes.LightPink;
+                     COMMAND = true;
+                    Modbus.Require(Modbus.ReqStruc);//t
                 }
                 else
                 {
@@ -234,10 +252,31 @@ namespace WinBrake
                     Modbus.ReqStruc.unitId = 0x1;
                     Modbus.ReqStruc.funCode = 0x4;
                     Modbus.ReqStruc.startAdr.w = (ushort)(Modbus.INPADR0);
-                    Modbus.ReqStruc.quantity.w = (ushort)((dtn+1)*WORDSREAD) ;              
+                    Modbus.ReqStruc.quantity.w = (ushort)((dtn+1)*WORDSREAD) ;
+                    Modbus.Require(Modbus.ReqStruc);//t
                 }
-                Modbus.Require(Modbus.ReqStruc);
-            }            
+                // Modbus.Require(Modbus.ReqStruc);
+                if ((bool)GreasEna.IsChecked)
+                {
+                    Gredist.IsEnabled = true; CyclesBGrease.IsEnabled = true;
+                    GredistLabel.IsEnabled = true; CyclesBGreaseLabel.IsEnabled = true;
+                }
+                else
+                {
+                    Gredist.IsEnabled = false; CyclesBGrease.IsEnabled = false;
+                    GredistLabel.IsEnabled = false; CyclesBGreaseLabel.IsEnabled = false;
+                }
+                if ((bool)Test.IsChecked)
+                {
+                    NoforceLabel.IsEnabled = false; Noforce.IsEnabled = false;
+                }
+                else
+                {
+                    NoforceLabel.IsEnabled = true; Noforce.IsEnabled = true;
+                }
+
+
+            }
             catch (Exception e)
             {
                 System.Windows.MessageBox.Show("Timer tick except:\n" + e.ToString());
@@ -261,13 +300,15 @@ namespace WinBrake
                     Space.Text = ((float)Modbus.HOLDREGS[0].w / KD).ToString("0.0");
                     Moment.Text = ((float)Modbus.HOLDREGS[1].w / KM).ToString("0.0");
                     GreasEna.IsChecked = (bool)((Modbus.HOLDREGS[2].w & 1) != 0);
+                    Test.IsChecked = (bool)((Modbus.HOLDREGS[2].w & 2) != 0);
                     Force.Text = (Modbus.HOLDREGS[3].w).ToString();
                     Noforce.Text = (Modbus.HOLDREGS[4].w).ToString();
                     Closemm.Text = ((float)Modbus.HOLDREGS[5].w / KD).ToString("0.0");
-                    Cycles.Text = (Modbus.HOLDREGS[6].w).ToString();
+                    CyclesBGrease.Text = (Modbus.HOLDREGS[6].w).ToString();
                     Gredist.Text = ((float)Modbus.HOLDREGS[7].w / KD).ToString("0.0");
                     CurtPar = (float)Modbus.HOLDREGS[8].w / 20;
-                    Curt.Text = CurtPar.ToString("0.0");
+                    Curt.Text = CurtPar.ToString();
+                    Cycles.Text = ((Int16)(Modbus.HOLDREGS[9].w)).ToString();
 
                 }
                 else
@@ -283,6 +324,13 @@ namespace WinBrake
             }
             else
             {
+                CycAx = (short)Modbus.INPREGS[0].w;
+                if(CycAx != CycAxold)
+                {
+                    CyclesPar = CycAx;
+                    Cycles.Text = CyclesPar.ToString();
+                }
+                CycAxold = CycAx;
                 COM.Background = Brushes.LightGreen;
                 if (GraphEn.IsChecked == true)
                 {
